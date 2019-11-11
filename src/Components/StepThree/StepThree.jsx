@@ -1,64 +1,99 @@
-import React, { Component } from 'react'
-import { Link } from 'react-router-dom'
-import axios from 'axios'
+import React, { Component } from "react";
+import { Link } from "react-router-dom";
+import axios from "axios";
 
-import store, { STEP_THREE, CLEAR } from '../../store'
+// React Redux
+import { connect } from "react-redux";
+import { stepThree, clear } from "../../dux/reducer";
 
-export default class Wizard extends Component {
-  constructor(){
+class StepThree extends Component {
+  constructor() {
     super();
 
-    const reduxState = store.getState();
-
     this.state = {
-      mortgage: reduxState.mortgage,
-      rent: reduxState.rent
-    }
+      mortgage: 0,
+      rent: 0
+    };
   }
 
-  componentDidMount(){
-    store.subscribe(() => {
-      const reduxState = store.getState();
-      this.setState({
-        mortgage: reduxState.mortgage,
-        rent: reduxState.rent
-      })
-    })
+  componentDidMount() {
+    const { mortgage, rent } = this.props;
+    this.setState({ mortgage, rent });
   }
 
-  handleChange = (event) => {
-    const { name, value } = event.target
-    this.setState({[name]: value})
-  }
+  handleChange = event => {
+    const { name, value } = event.target;
+    this.setState({ [name]: value });
+  };
 
   handleSubmit = () => {
-    const reduxState = store.getState();
     const { mortgage, rent } = this.state;
-    const { name, address, city, state, zip, image } = reduxState;
+    const { name, address, city, state, zip, image } = this.props;
+
     const body = { name, address, city, state, zip, image, mortgage, rent };
 
-    axios.post(`/api/houses`, body)
-      .then( () => {
+    axios
+      .post(`/api/houses`, body)
+      .then(() => {
         this.setState({
           mortgage: 0,
           rent: 0
-        })
-        store.dispatch({type: CLEAR})
-        this.props.history.push("/")
+        });
+        this.props.clear();
+        this.props.history.push("/");
       })
-      .catch( err => console.log(err))
-  }
+      .catch(err => console.log(err));
+  };
 
-  render (){
+  render() {
+    const { mortgage, rent } = this.state;
     return (
       <div>
-        <input type="text" name="mortgage" onChange={this.handleChange} value={this.state.mortgage} placeholder="Mortgage" />
-        <input type="text" name="rent" onChange={this.handleChange} value={this.state.rent} placeholder="Rent" />
+        <input
+          type="text"
+          name="mortgage"
+          onChange={this.handleChange}
+          value={this.state.mortgage}
+          placeholder="Mortgage"
+        />
+        <input
+          type="text"
+          name="rent"
+          onChange={this.handleChange}
+          value={this.state.rent}
+          placeholder="Rent"
+        />
         <Link to="/wizard/2">
-          <button onClick={() => store.dispatch({type: STEP_THREE, payload: this.state})}>Previous</button>
+          <button onClick={() => this.props.stepThree(mortgage, rent)}>
+            Previous
+          </button>
         </Link>
         <button onClick={this.handleSubmit}>Complete</button>
       </div>
-    )
+    );
   }
 }
+
+function mapStateToProps(reduxState) {
+  const { name, address, city, state, zip, image, mortgage, rent } = reduxState;
+  return {
+    name,
+    address,
+    city,
+    state,
+    zip,
+    image,
+    mortgage,
+    rent
+  };
+}
+
+const mapDispatchToProps = {
+  stepThree,
+  clear
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(StepThree);

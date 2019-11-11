@@ -1,54 +1,100 @@
-import React, { Component } from 'react'
-import { Link } from 'react-router-dom'
+import React, { Component } from "react";
+import { Link } from "react-router-dom";
 
-import store, { STEP_ONE } from '../../store'
+// React-redux
+import { connect } from "react-redux";
+import { stepOne } from "../../dux/reducer";
 
-export default class Wizard extends Component {
-  constructor(){
+class StepOne extends Component {
+  constructor() {
     super();
 
-    const reduxState = store.getState()
-
     this.state = {
-      name: reduxState.name,
-      address: reduxState.address,
-      city: reduxState.city,
-      state: reduxState.state,
-      zip: reduxState.zip
-    }
+      name: "",
+      address: "",
+      city: "",
+      state: "",
+      zip: 0
+    };
   }
 
-  componentDidMount(){
-    store.subscribe(() => {
-      const reduxState = store.getState()
-      this.setState({
-        name: reduxState.name,
-        address: reduxState.address,
-        city: reduxState.city,
-        state: reduxState.state,
-        zip: reduxState.zip
-      })
-    })
+  componentDidMount() {
+    const { name, address, city, state, zip } = this.props;
+    this.setState({ name, address, city, state, zip });
   }
 
-  handleChange = (event) => {
-    const { name, value } = event.target
-    this.setState({[name]: value})
-  }
+  handleChange = event => {
+    const { name, value } = event.target;
+    this.setState({ [name]: value });
+  };
 
-  render (){
+  render() {
     const { name, address, city, state, zip } = this.state;
     return (
       <div>
-        <input type="text" name="name" onChange={this.handleChange} value={name} placeholder="Name" />
-        <input type="text" name="address" onChange={this.handleChange} value={address} placeholder="Address" />
-        <input type="text" name="city" onChange={this.handleChange} value={city} placeholder="City" />
-        <input type="text" name="state" onChange={this.handleChange} value={state} placeholder="State" />
-        <input type="text" name="zip" onChange={this.handleChange} value={zip} placeholder="ZIP" />
+        <input
+          type="text"
+          name="name"
+          value={name}
+          placeholder="Name"
+          onChange={this.handleChange}
+        />
+        <input
+          type="text"
+          name="address"
+          value={address}
+          placeholder="Address"
+          onChange={this.handleChange}
+        />
+        <input
+          type="text"
+          name="city"
+          value={city}
+          placeholder="City"
+          onChange={this.handleChange}
+        />
+        <input
+          type="text"
+          name="state"
+          value={state}
+          placeholder="State"
+          onChange={this.handleChange}
+        />
+        <input
+          type="text"
+          name="zip"
+          value={zip}
+          placeholder="ZIP"
+          onChange={this.handleChange}
+        />
         <Link to="/wizard/2">
-          <button onClick={() => store.dispatch({type: STEP_ONE, payload: this.state})}>Next</button>
+          <button
+            onClick={() => this.props.stepOne(name, address, city, state, zip)}
+          >
+            Next
+          </button>
         </Link>
       </div>
-    )
+    );
   }
 }
+
+function mapStateToProps(reduxState) {
+  const { name, address, city, state, zip } = reduxState;
+  return {
+    name,
+    address,
+    city,
+    state,
+    zip
+  };
+}
+
+const mapDispatchToProps = {
+  stepOne
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(StepOne);

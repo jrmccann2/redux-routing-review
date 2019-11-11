@@ -1,45 +1,64 @@
-import React, { Component } from 'react'
-import { Link } from 'react-router-dom'
+import React, { Component } from "react";
+import { Link } from "react-router-dom";
 
-import store, { STEP_TWO } from '../../store'
+// React Redux
+import { connect } from "react-redux";
+import { stepTwo } from "../../dux/reducer";
 
-export default class Wizard extends Component {
-  constructor(){
+class StepTwo extends Component {
+  constructor() {
     super();
 
-    const reduxState = store.getState()
-
     this.state = {
-      image: reduxState.image
-    }
+      image: ""
+    };
   }
 
-  componentDidMount(){
-    store.subscribe(() => {
-      const reduxState = store.getState();
-      this.setState({
-        image: reduxState.image
-      })
-    })
+  componentDidMount() {
+    const { image } = this.props;
+    this.setState({ image });
   }
 
-  handleChange = (event) => {
-    const { name, value } = event.target
-    this.setState({[name]: value})
-  }
+  handleChange = event => {
+    const { name, value } = event.target;
+    this.setState({ [name]: value });
+  };
 
-  render (){
+  render() {
+    const { image } = this.state;
     return (
       <div>
         <h1>Wizard</h1>
-        <input type="text" name="image" onChange={this.handleChange} value={this.state.image} placeholder="Image URL" />
+        <input
+          type="text"
+          name="image"
+          value={this.state.image}
+          placeholder="Image URL"
+          onChange={this.handleChange}
+        />
         <Link to="/wizard/1">
-          <button onClick={() => store.dispatch({type: STEP_TWO, payload: this.state})}>Previous</button>
+          <button onClick={() => this.props.stepTwo(image)}>Previous</button>
         </Link>
         <Link to="/wizard/3">
-          <button onClick={() => store.dispatch({type: STEP_TWO, payload: this.state})}>Next</button>
+          <button onClick={() => this.props.stepTwo(image)}>Next</button>
         </Link>
       </div>
-    )
+    );
   }
 }
+
+function mapStateToProps(reduxState) {
+  const { image } = reduxState;
+  return {
+    image
+  };
+}
+
+const mapDispatchToProps = {
+  stepTwo
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(StepTwo);
